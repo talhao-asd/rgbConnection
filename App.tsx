@@ -1,27 +1,49 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import RGBConnection from './src/screens/RGBConnection';
-import DeviceControlScreen from './src/screens/DeviceControlScreen';
+import React, { useState, useEffect, createContext } from 'react';
+import Navigation from './src/navigation';
+import LoadingComponent from './src/components/LoadingComponent';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
 
-const Stack = createNativeStackNavigator();
+// Create a loading context to manage loading state across the app
+export const LoadingContext = createContext({
+  isLoading: false,
+  setIsLoading: (loading: boolean) => {},
+});
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
+
+  // Simulate initial app loading
+  useEffect(() => {
+    const prepareApp = async () => {
+      try {
+        // Add your initialization logic here
+        // For example: load fonts, check authentication, etc.
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Changed from 2000 to 3000 ms
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setIsLoading(false);
+        setIsReady(true);
+      }
+    };
+
+    prepareApp();
+  }, []);
+
+  if (!isReady) {
+    // Show loading screen during initial app load
+    return <LoadingComponent />;
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="RGBConnection">
-        <Stack.Screen 
-          name="RGBConnection" 
-          component={RGBConnection}
-          options={{ title: 'Connect Device' }}
-        />
-        <Stack.Screen 
-          name="DeviceControl" 
-          component={DeviceControlScreen}
-          options={{ title: 'Device Control' }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <LoadingContext.Provider value={{ isLoading, setIsLoading }}>
+        {isLoading && <LoadingComponent />}
+        <Navigation />
+      </LoadingContext.Provider>
+    </Provider>
   );
 };
 
