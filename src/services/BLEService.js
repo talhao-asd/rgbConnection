@@ -228,6 +228,83 @@ class BLEService {
       return false;
     }
   }
+
+  // Parse data received from device
+  parseDeviceData(data) {
+    // Sample format: >Y150101|
+    if (!data || data.length < 7) {
+      console.warn('Received invalid data format:', data);
+      return null;
+    }
+    
+    try {
+      // Find the start and end markers
+      const startIndex = data.indexOf('>');
+      const endIndex = data.indexOf('|');
+      
+      if (startIndex === -1 || endIndex === -1 || startIndex >= endIndex) {
+        console.warn('Invalid data format (missing markers):', data);
+        return null;
+      }
+      
+      // Extract the content between markers
+      const content = data.substring(startIndex + 1, endIndex);
+      console.log('Extracted content from device data:', content);
+      
+      // First character is the mode
+      const mode = content.charAt(0);
+      
+      // Parse the remaining data based on the format
+      if (content.length < 2) {
+        console.warn('Data content too short:', content);
+        return null;
+      }
+      
+      // Check if the mode letter is uppercase (indicating power is ON)
+      const isPowerOn = mode === mode.toUpperCase();
+      console.log(`Mode character is '${mode}', power is ${isPowerOn ? 'ON' : 'OFF'}`);
+      
+      // Parse the rest of the data
+      // Format: Y115050| -> mode(Y) + ledCount(1) + animationMode(1) + animationSpeed(50) + waitingTime(50)
+      const ledCount = content.charAt(1);
+      const animationMode = content.length > 2 ? content.charAt(2) : '0';
+      
+      // Extract animation speed and waiting time
+      let animationSpeed = 50;
+      let waitingTime = 50;
+      
+      if (content.length >= 5) {
+        // Extract animation speed (2 digits)
+        animationSpeed = parseInt(content.substring(3, 5), 10);
+      }
+      
+      if (content.length >= 7) {
+        // Extract waiting time (2 digits)
+        waitingTime = parseInt(content.substring(5, 7), 10);
+      }
+      
+      console.log('Parsed data values:', {
+        mode,
+        ledCount,
+        animationMode,
+        animationSpeed,
+        waitingTime,
+        isPowerOn
+      });
+      
+      return {
+        mode,
+        ledCount,
+        animationMode,
+        animationSpeed,
+        waitingTime,
+        isPowerOn // Uppercase means power is ON
+      };
+    } catch (error) {
+      console.error('Error parsing device data:', error);
+      return null;
+    }
+  }
 }
 
-export default new BLEService();
+export default BLEService;
