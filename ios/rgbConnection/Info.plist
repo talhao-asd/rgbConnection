@@ -26,14 +26,13 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -48,5 +47,26 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AlbertSans-Black.ttf</string>
+		<string>AlbertSans-BlackItalic.ttf</string>
+		<string>AlbertSans-Bold.ttf</string>
+		<string>AlbertSans-BoldItalic.ttf</string>
+		<string>AlbertSans-ExtraBold.ttf</string>
+		<string>AlbertSans-ExtraBoldItalic.ttf</string>
+		<string>AlbertSans-ExtraLight.ttf</string>
+		<string>AlbertSans-ExtraLightItalic.ttf</string>
+		<string>AlbertSans-Italic.ttf</string>
+		<string>AlbertSans-Light.ttf</string>
+		<string>AlbertSans-LightItalic.ttf</string>
+		<string>AlbertSans-Medium.ttf</string>
+		<string>AlbertSans-MediumItalic.ttf</string>
+		<string>AlbertSans-Regular.ttf</string>
+		<string>AlbertSans-SemiBold.ttf</string>
+		<string>AlbertSans-SemiBoldItalic.ttf</string>
+		<string>AlbertSans-Thin.ttf</string>
+		<string>AlbertSans-ThinItalic.ttf</string>
+	</array>
 </dict>
 </plist>
