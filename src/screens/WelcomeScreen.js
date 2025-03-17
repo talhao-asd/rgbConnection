@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, Modal, FlatList, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, Image, TouchableOpacity, Modal, FlatList, ActivityIndicator, Alert, Dimensions } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import Footer from '../components/SettingsFooter'
@@ -13,6 +13,9 @@ const WelcomeScreen = ({ navigation }) => {
   
   // Use useRef to store the BLEService instance
   const bleServiceRef = useRef(null);
+  
+  // Get screen dimensions
+  const { width, height } = Dimensions.get('window');
   
   // Initialize BLEService once when component mounts
   useEffect(() => {
@@ -94,15 +97,15 @@ const WelcomeScreen = ({ navigation }) => {
       <View style={{marginTop: 100, alignItems: 'center'}}>
         <Text style={{
           color: '#ffffff', 
-          fontSize: 48, 
+          fontSize: width * 0.10, // Responsive font size based on screen width
           textAlign: 'center', 
           marginBottom: 18, 
           fontFamily: 'AlbertSans-Bold'
         }}>HOŞGELDİNİZ</Text>
         <Text style={{
           color: '#AEAEAE', 
-          fontSize: 18, 
-          width: 250, 
+          fontSize: width * 0.045, // Responsive font size for subtitle
+          width: width * 0.7, // Responsive width
           textAlign: 'center', 
           marginBottom: 18,
           fontFamily: 'AlbertSans-Regular'
