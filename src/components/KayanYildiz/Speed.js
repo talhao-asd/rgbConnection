@@ -27,21 +27,21 @@ const Speed = ({ moduleCount }) => {
     <View style={styles.container}>
       <Slider
         label="Animasyon Hızı"
-        value={animationSpeed}
+        value={animationSpeed || 10}
         onValueChange={handleAnimationSpeedChange}
         gradientColors={['#3C1053', '#AD5389']}
+        minimumValue={1}
+        maximumValue={10}
+        stepSize={1}
       />
       <Slider
         label="Bekleme Süresi"
-        value={waitingTime}
+        value={waitingTime || 10}
         onValueChange={handleWaitingTimeChange}
         gradientColors={['#3C1053', '#AD5389']}
-      />
-      <Slider
-        label="Işık Yoğunluğu"
-        value={lightIntensity}
-        onValueChange={handleLightIntensityChange}
-        gradientColors={['#3C1053', '#AD5389']}
+        minimumValue={1}
+        maximumValue={99}
+        stepSize={1}
       />
     </View>
   );
