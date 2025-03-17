@@ -42,10 +42,10 @@ const Footer = memo(({
   sendImmediately = true // Whether to send command immediately on power button press
 }) => {
   const [isPowerOn, setIsPowerOn] = useState(false);
-  const [connectedDevice, setConnectedDevice] = useState(externalDevice);
+  const [connectedDevice, setConnectedDevice] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   
-  // Track values with refs to avoid dependency issues in useCallback
+  // Store current values in a ref to avoid stale closures
   const valuesRef = useRef({
     mode,
     ledCount,
@@ -61,7 +61,7 @@ const Footer = memo(({
     whiteValue
   });
   
-  // Update ref values when props change
+  // Update ref when props change
   useEffect(() => {
     valuesRef.current = {
       mode,
