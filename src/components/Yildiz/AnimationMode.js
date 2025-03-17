@@ -61,7 +61,7 @@ const AnimationMode = ({ moduleCount }) => {
               padding: 10,
               borderRadius: 50,
               width: 300,
-              backgroundColor: '#ffffff',
+              backgroundColor: '#D9D9D9',
             }}>
               <Text
                 style={{
@@ -91,7 +91,7 @@ const AnimationMode = ({ moduleCount }) => {
                 width: 142.5,
                 height: 55,
                 backgroundColor:
-                  animationMode === index ? '#289E70' : '#ffffff',
+                  animationMode === index ? '#289E70' : '#D9D9D9',
                 borderRadius: 16,
               }}
             />
@@ -106,7 +106,7 @@ const AnimationMode = ({ moduleCount }) => {
                 width: 142.5,
                 height: 55,
                 backgroundColor:
-                  animationMode === index ? '#289E70' : '#ffffff',
+                  animationMode === index ? '#289E70' : '#D9D9D9',
                 borderRadius: 16,
               }}
             />
@@ -121,7 +121,7 @@ const AnimationMode = ({ moduleCount }) => {
                 width: 142.5,
                 height: 55,
                 backgroundColor:
-                  animationMode === index ? '#289E70' : '#ffffff',
+                  animationMode === index ? '#289E70' : '#D9D9D9',
                 borderRadius: 16,
               }}
             />
