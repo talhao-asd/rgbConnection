@@ -1,36 +1,44 @@
-import React from 'react';
-import {
-  View,
-  StyleSheet,
-} from 'react-native';
-import Slider from '../Slider';
-import { useDispatch, useSelector } from 'react-redux';
-import { setSpeed } from '../../redux/slices/rgbSlice';
+import React, {memo} from 'react';
+import {View, StyleSheet} from 'react-native';
+import Slider from '@react-native-community/slider';
+import {useDispatch, useSelector} from 'react-redux';
+import {setSpeed} from '../../redux/slices/rgbSlice';
 
-const Speed = () => {
+const Speed = memo(() => {
   const dispatch = useDispatch();
-  const { speed } = useSelector(state => state.rgb);
+  const {speed} = useSelector(state => state.rgb);
 
-  const handleSpeedChange = (value) => {
-    dispatch(setSpeed(value));
+  const handleSpeedChange = value => {
+    // Convert to integer and ensure it's between 1-99
+    const normalizedSpeed = Math.max(1, Math.min(99, Math.round(value)));
+    dispatch(setSpeed(normalizedSpeed));
   };
 
   return (
     <View style={styles.container}>
       <Slider
-        label="Parlaklık"
+        style={styles.slider}
+        minimumValue={1}
+        maximumValue={99}
         value={speed}
         onValueChange={handleSpeedChange}
-        gradientColors={['#F38181', '#FCE38A']}
+        minimumTrackTintColor="#2196F3"
+        maximumTrackTintColor="#000000"
+        thumbTintColor="#2196F3"
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    marginTop: 10,
+    width: '100%',
+    paddingHorizontal: 20,
+    marginVertical: 10,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
   },
 });
 
