@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  selectedAnimation: 0, // Index of the selected animation
-  animationSpeed: 50, // Default animation speed value (0-100)
+  selectedAnimation: 1, // Index of the selected animation
+  animationSpeed: 5, // Default animation speed value (1-10)
   waitingTime: 50,    // Default waiting time value (0-100)
   lightIntensity: 50, // Default light intensity value (0-100)
   animations: [
@@ -18,18 +18,6 @@ const initialState = {
     { id: 10, name: 'Animation 10' },
     { id: 11, name: 'Animation 11' },
     { id: 12, name: 'Animation 12' },
-    { id: 13, name: 'Animation 13' },
-    { id: 14, name: 'Animation 14' },
-    { id: 15, name: 'Animation 15' },
-    { id: 16, name: 'Animation 16' },
-    { id: 17, name: 'Animation 17' },
-    { id: 18, name: 'Animation 18' },
-    { id: 19, name: 'Animation 19' },
-    { id: 20, name: 'Animation 20' },
-    { id: 21, name: 'Animation 21' },
-    { id: 22, name: 'Animation 22' },
-    { id: 23, name: 'Animation 23' },
-    { id: 24, name: 'Animation 24' },
   ],
 };
 
