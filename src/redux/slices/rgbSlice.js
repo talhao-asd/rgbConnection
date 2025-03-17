@@ -5,8 +5,10 @@ const initialState = {
     r: 255,
     g: 255,
     b: 255,
+    w: 0,  // Added white value
   },
-  speed: 50, // Default speed value (0-100)
+  speed: 50, // Default brightness/speed value
+  isOn: false, // Power state
 };
 
 const rgbSlice = createSlice({
@@ -19,12 +21,15 @@ const rgbSlice = createSlice({
     setSpeed: (state, action) => {
       state.speed = action.payload;
     },
-    resetRgbState: (state) => {
-      return initialState;
+    togglePower: (state) => {
+      state.isOn = !state.isOn;
+    },
+    setPower: (state, action) => {
+      state.isOn = action.payload;
     },
   },
 });
 
-export const { setColor, setSpeed, resetRgbState } = rgbSlice.actions;
+export const { setColor, setSpeed, togglePower, setPower } = rgbSlice.actions;
 
 export default rgbSlice.reducer; 
