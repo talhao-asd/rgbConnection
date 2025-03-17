@@ -103,9 +103,10 @@ const Header = memo(({navigation}) => {
           flexDirection: 'row',
           flexWrap: 'wrap',
           justifyContent: 'space-around',
-          width: '100%'
+          width: '100%',
+
         }}>
-          <View style={{flexDirection: 'row', gap: 40, marginBottom: 15}}>
+          <View style={{flexDirection: 'row', gap: 20, marginBottom: 15}}>
             <TabButton 
               label="Kayan Yıldız"
               isSelected={activeComponent === 'Kayan Yıldız'}
@@ -117,7 +118,7 @@ const Header = memo(({navigation}) => {
               onPress={() => handleModuleSelect('Yıldız')}
             />
           </View>
-          <View style={{flexDirection: 'row', gap: 40}}>
+          <View style={{flexDirection: 'row', gap: 30}}>
             <TabButton 
               label="Mod"
               isSelected={activeComponent === 'Mod'}
