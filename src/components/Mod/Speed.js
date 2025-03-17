@@ -5,23 +5,39 @@ import {
 } from 'react-native';
 import Slider from '../Slider';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAnimationSpeed } from '../../redux/slices/modSlice';
+import { setAnimationSpeed, setLightIntensity } from '../../redux/slices/modSlice';
 
 const Speed = () => {
   const dispatch = useDispatch();
-  const { animationSpeed } = useSelector(state => state.mod);
-
+  const { animationSpeed, lightIntensity } = useSelector(state => state.mod);
+  
   const handleAnimationSpeedChange = (value) => {
     dispatch(setAnimationSpeed(value));
+  };
+  
+  const handleLightIntensityChange = (value) => {
+    dispatch(setLightIntensity(value));
   };
 
   return (
     <View style={styles.container}>
       <Slider
         label="Animasyon Hızı"
-        value={animationSpeed}
+        value={animationSpeed || 5}
         onValueChange={handleAnimationSpeedChange}
         gradientColors={['#3C1053', '#AD5389']}
+        minimumValue={1}
+        maximumValue={10}
+        stepSize={1}
+      />
+      <Slider
+        label="Parlaklık"
+        value={lightIntensity || 50}
+        onValueChange={handleLightIntensityChange}
+        gradientColors={['#3C1053', '#AD5389']}
+        minimumValue={1}
+        maximumValue={99}
+        stepSize={1}
       />
     </View>
   );
