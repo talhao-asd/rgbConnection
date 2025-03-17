@@ -9,7 +9,7 @@ const AnimationMod = ({ moduleCount }) => {
   const { animationMode } = useSelector(state => state.kayanYildiz);
   
   const handleOtomatikPress = () => {
-    dispatch(setAnimationMode(-1)); // Set animationMode to -1 for "OTOMATIK"
+    dispatch(setAnimationMode(5)); // Set animationMode to -1 for "OTOMATIK"
   };
   
   const handleModePress = (index) => {
@@ -35,27 +35,45 @@ const AnimationMod = ({ moduleCount }) => {
             alignSelf: 'center',
           }}
           onPress={handleOtomatikPress}
-          >
-            
-          <LinearGradient
-            colors={['#caef46', '#289E70']}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}
-            style={{
+        >
+          {animationMode === 5 ? (
+            <LinearGradient
+              colors={['#caef46', '#289E70']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={{
+                padding: 10,
+                borderRadius: 50,
+                width: 300,
+              }}>
+              <Text
+                style={{
+                  color: '#000000',
+                  fontSize: 16,
+                  fontFamily: 'AlbertSans-Medium',
+                  textAlign: 'center',
+                }}>
+                OTOMATIK
+              </Text>
+            </LinearGradient>
+          ) : (
+            <View style={{
               padding: 10,
               borderRadius: 50,
               width: 300,
+              backgroundColor: '#D9D9D9',
             }}>
-            <Text
-              style={{
-                color: '#000000',
-                fontSize: 16,
-                fontFamily: 'AlbertSans-Medium',
-                textAlign: 'center',
-              }}>
-              OTOMATIK
-            </Text>
-          </LinearGradient>
+              <Text
+                style={{
+                  color: '#000000',
+                  fontSize: 16,
+                  fontFamily: 'AlbertSans-Medium',
+                  textAlign: 'center',
+                }}>
+                OTOMATIK
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
       <View
@@ -68,7 +86,7 @@ const AnimationMod = ({ moduleCount }) => {
           marginTop: 5,
         }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {[0, 1, 2, 3, 4].map(index => (
+          {[0, 1, 2, 3].map(index => (
             <TouchableOpacity
               key={index}
               onPress={() => handleModePress(index)}
