@@ -1,31 +1,33 @@
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, Dimensions} from 'react-native';
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // veya başka bir ikon seti
 import LinearGradient from 'react-native-linear-gradient';
 
 const DoubleModule = ({onBack, onModuleCountSelect, selectedModuleCount}) => {
+  const {width} = Dimensions.get('window');
+  
   return (
-    <View style={{width: '60%', alignItems: 'center', marginTop: 30}}>
+    <View style={{width: '60%', alignItems: 'center', marginTop: width * 0.07}}>
       <View
         style={{
-          marginBottom: 40,
+          marginBottom: width * 0.02,
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 10,
+          gap: width * 0.025,
           backgroundColor: '#000000',
-          padding: 10,
+          padding: width * 0.025,
           borderRadius: 10,
         }}>
         <TouchableOpacity style={{width: '10%'}} onPress={onBack}>
-          <Icon name="arrow-back" size={24} color="#ffffff" />
+          <Icon name="arrow-back" size={width * 0.06} color="#ffffff" />
         </TouchableOpacity>
-        <View style={{width: '90%', marginLeft: 20}}>
+        <View style={{width: '90%', marginLeft: width * 0.05}}>
           <LinearGradient
             colors={['#3C1053', '#AD5389','#F38181', '#FCE38A']}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
             style={{
-              padding: 10,
+              padding: width * 0.025,
               borderRadius: 10,
               alignItems: 'center',
               width: '100%',
@@ -33,7 +35,7 @@ const DoubleModule = ({onBack, onModuleCountSelect, selectedModuleCount}) => {
             <Text
               style={{
                 color: '#000000',
-                fontSize: 12,
+                fontSize: width * 0.03,
                 textAlign: 'center',
                 fontFamily: 'AlbertSans-Bold',
               }}>
@@ -45,55 +47,54 @@ const DoubleModule = ({onBack, onModuleCountSelect, selectedModuleCount}) => {
       <Text
         style={{
           color: '#AEAEAE',
-          fontSize: 16,
+          fontSize: width * 0.037,
           fontFamily: 'AlbertSans-Regular',
         }}>
         Yıldız modunu kullanmak için cihazın modül adedini seçiniz.
       </Text>
       <View
         style={{
-          marginTop: 20,
+          marginTop: width * 0.05,
           backgroundColor: '#000000',
-          padding: 10,
+          padding: width * 0.025,
           borderRadius: 10,
         }}>
         <View
           style={{
             flexDirection: 'row',
-            gap: 10,
-            width: 260,
+            gap: width * 0.025,
+            width: width * 0.65,
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
           <Text
             style={{
               color: '#ffffff',
-              fontSize: 16,
+              fontSize: width * 0.04,
               fontFamily: 'AlbertSans-Regular',
             }}>
             Modül Sayısı
           </Text>
-          <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+          <View style={{flexDirection: 'row', gap: width * 0.025, alignItems: 'center'}}>
             <TouchableOpacity 
-              style={{ width: 35 }}
+              style={{ width: width * 0.085 }}
               onPress={() => onModuleCountSelect(1)}
             >
               <LinearGradient
-                colors={selectedModuleCount === 1 ? ['#F38181', '#FCE38A'] : ['#3C1053', '#AD5389','#F38181', '#FCE38A']}
+                colors={selectedModuleCount === 1 ? ['#3C1053', '#AD5389','#F38181', '#FCE38A'] :  ['#AEAEAE', '#AEAEAE'] }
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 1}}
                 style={{
-                  padding: 10,
-                  borderRadius: 20,
+                  padding: width * 0.025,
+                  borderRadius: width * 0.05,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderWidth: selectedModuleCount === 1 ? 2 : 0,
                   borderColor: '#ffffff',
                 }}>
                 <Text
                   style={{
                     color: '#000000',
-                    fontSize: 12,
+                    fontSize: width * 0.025,
                     fontFamily: 'AlbertSans-Bold',
                     textAlign: 'center',
                   }}>
@@ -102,25 +103,24 @@ const DoubleModule = ({onBack, onModuleCountSelect, selectedModuleCount}) => {
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity 
-              style={{ width: 35 }}
+              style={{ width: width * 0.085 }}
               onPress={() => onModuleCountSelect(2)}
             >
               <LinearGradient
-                colors={selectedModuleCount === 2 ? ['#F38181', '#FCE38A'] : ['#3C1053', '#AD5389','#F38181', '#FCE38A']}
+                colors={selectedModuleCount === 2 ? ['#3C1053', '#AD5389','#F38181', '#FCE38A'] :  ['#AEAEAE', '#AEAEAE'] }
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 1}}
                 style={{
-                  padding: 10,
-                  borderRadius: 20,
+                  padding: width * 0.025,
+                  borderRadius: width * 0.05,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderWidth: selectedModuleCount === 2 ? 2 : 0,
                   borderColor: '#ffffff',
                 }}>
                 <Text
                   style={{
                     color: '#000000',
-                    fontSize: 12,
+                    fontSize: width * 0.025,
                     fontFamily: 'AlbertSans-Bold',
                     textAlign: 'center',
                   }}>
@@ -129,25 +129,24 @@ const DoubleModule = ({onBack, onModuleCountSelect, selectedModuleCount}) => {
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity 
-              style={{ width: 35 }}
+              style={{ width: width * 0.085 }}
               onPress={() => onModuleCountSelect(3)}
             >
               <LinearGradient
-                colors={selectedModuleCount === 3 ? ['#F38181', '#FCE38A'] : ['#3C1053', '#AD5389','#F38181', '#FCE38A']}
+                colors={selectedModuleCount === 3 ? ['#3C1053', '#AD5389','#F38181', '#FCE38A'] :  ['#AEAEAE', '#AEAEAE'] }
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 1}}
                 style={{
-                  padding: 10,
-                  borderRadius: 20,
+                  padding: width * 0.025,
+                  borderRadius: width * 0.05,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderWidth: selectedModuleCount === 3 ? 2 : 0,
                   borderColor: '#ffffff',
                 }}>
                 <Text
                   style={{
                     color: '#000000',
-                    fontSize: 12,
+                    fontSize: width * 0.025,
                     fontFamily: 'AlbertSans-Bold',
                     textAlign: 'center',
                   }}>
