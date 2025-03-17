@@ -164,6 +164,62 @@ class BLEService {
     }
   }
 
+  // Overloaded method that accepts custom service and characteristic UUIDs
+  async writeDataToDevice(deviceId, data, serviceUUID, characteristicUUID) {
+    // If serviceUUID and characteristicUUID are provided, use them, otherwise use the default method
+    if (serviceUUID && characteristicUUID) {
+      const device = this.connectedDevices.get(deviceId);
+      if (!device) {
+        throw new Error(`Device ${deviceId} not connected`);
+      }
+
+      try {
+        console.log('Writing data with custom UUIDs:', data);
+        console.log('Service UUID:', serviceUUID);
+        console.log('Characteristic UUID:', characteristicUUID);
+        
+        // Convert string to UTF-8 encoded bytes
+        const encoder = new TextEncoder();
+        const dataBytes = encoder.encode(data);
+        
+        await device.writeCharacteristicWithResponseForService(
+          serviceUUID,
+          characteristicUUID,
+          Buffer.from(dataBytes).toString('base64')
+        );
+        console.log('Write with custom UUIDs successful');
+        return true;
+      } catch (error) {
+        console.error('Write with custom UUIDs error:', error);
+        return false;
+      }
+    } else {
+      // Use the original method implementation
+      const device = this.connectedDevices.get(deviceId);
+      if (!device) {
+        throw new Error(`Device ${deviceId} not connected`);
+      }
+
+      try {
+        console.log('Writing data:', data);
+        // Convert string to UTF-8 encoded bytes
+        const encoder = new TextEncoder();
+        const dataBytes = encoder.encode(data);
+        
+        await device.writeCharacteristicWithResponseForService(
+          this.SERVICE_UUID,
+          this.CHARACTERISTIC_WRITE_UUID,
+          Buffer.from(dataBytes).toString('base64')
+        );
+        console.log('Write successful');
+        return true;
+      } catch (error) {
+        console.error('Write error:', error);
+        return false;
+      }
+    }
+  }
+
   async disconnectDevice(deviceId) {
     const device = this.connectedDevices.get(deviceId);
     if (device) {
