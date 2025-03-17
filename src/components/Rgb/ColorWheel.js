@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, memo} from 'react';
+import React, {useState, useEffect, useCallback, memo, useRef} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -15,9 +15,25 @@ const ColorWheelPicker = memo(() => {
   const dispatch = useDispatch();
   const {color} = useSelector(state => state.rgb);
   
+  // Flag to track if we're in white button mode to prevent ColorPicker from overriding
+  const isWhiteButtonMode = useRef(false);
+  
   // Convert RGB object to hex for the color picker
   const rgbToHex = (r, g, b) => {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  };
+
+  // Convert hex to RGB
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+          w: 0, // Reset white value to 0 when selecting a colored light
+        }
+      : null;
   };
   
   const [selectedColor, setSelectedColor] = useState(rgbToHex(color.r, color.g, color.b));
@@ -32,12 +48,15 @@ const ColorWheelPicker = memo(() => {
     '#2196F3', // Blue
   ];
 
-  // Special white color code for ESP32 - you can replace this with whatever code your device needs
-  const ESP32_WHITE_CODE = '#FFFFFF'; // Change this to the special code needed by your ESP32
-
   // Use useCallback to memoize the handler function
   const handleColorChange = useCallback(
     color => {
+      // Skip if we're in white button mode to prevent overriding white settings
+      if (isWhiteButtonMode.current) {
+        console.log('ColorPicker change ignored because white button is active');
+        return;
+      }
+      
       setSelectedColor(color);
       // Convert hex to RGB and dispatch to Redux
       const rgbColor = hexToRgb(color);
@@ -51,6 +70,9 @@ const ColorWheelPicker = memo(() => {
   // Use useCallback for preset handlers to avoid recreating on every render
   const handlePresetPress = useCallback(
     color => {
+      // Exit white button mode when pressing a preset
+      isWhiteButtonMode.current = false;
+      
       setSelectedColor(color);
       // Convert hex to RGB and dispatch to Redux
       const rgbColor = hexToRgb(color);
@@ -61,26 +83,48 @@ const ColorWheelPicker = memo(() => {
     [dispatch],
   );
 
-  // Special handler for white button
+  // Special handler for white button - sets RGB to 5,5,5 and white to 99
   const handleWhitePress = useCallback(() => {
-    setSelectedColor(ESP32_WHITE_CODE);
-    dispatch(setColor({r: 255, g: 255, b: 255}));
+    // Enter white button mode to prevent color picker from overriding
+    isWhiteButtonMode.current = true;
+    
+    // For white light using the W channel, set RGB to 5,5,5 (instead of 0,0,0) and W to 99
+    const whiteColor = {
+      r: 0,  // Use 5 instead of 0 to ensure the command works correctly
+      g: 0,  // Use 5 instead of 0 to ensure the command works correctly
+      b: 0,  // Use 5 instead of 0 to ensure the command works correctly
+      w: 99  // Use maximum white value
+    };
+    
+    // We still visually show white in the color picker
+    setSelectedColor('#FFFFFF');
+    
+    // Dispatch the white color settings to the Redux store
+    dispatch(setColor(whiteColor));
+    
+    console.log('White button pressed - setting RGB to 050505 and W to 99');
   }, [dispatch]);
+
+  // Add an effect to exit white button mode when user interacts with color wheel
+  const handlePickerTouchStart = useCallback(() => {
+    if (isWhiteButtonMode.current) {
+      console.log('User touched color wheel - exiting white button mode');
+      isWhiteButtonMode.current = false;
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
-      {/* Color Presets */}
-
       {/* Container for both the color wheel and the white button */}
-      <View
-        style={[styles.wheelContainer, {width: wheelSize, height: wheelSize}]}>
+      <View 
+        style={[styles.wheelContainer, {width: wheelSize, height: wheelSize}]}
+        onTouchStart={handlePickerTouchStart}>
         {/* Color Wheel */}
         <ColorPicker
           color={selectedColor}
           onColorChangeComplete={handleColorChange}
           thumbSize={20}
           sliderSize={20}
-
           noSnap={false}
           swatches={false}
           // Performance optimizations
