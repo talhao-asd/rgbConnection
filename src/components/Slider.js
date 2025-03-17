@@ -18,8 +18,8 @@ const Slider = memo(({
   onValueChange = () => {},
   onSlidingComplete = null,
   minimumValue = 1,
-  maximumValue = 99,
-  stepSize = 10,
+  maximumValue = 10,
+  stepSize = 1,
   gradientColors = ['#3C1053', '#AD5389'],
 }) => {
   // Round initial value to nearest step
