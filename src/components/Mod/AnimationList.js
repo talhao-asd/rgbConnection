@@ -17,19 +17,25 @@ const AnimationList = () => {
   
   useEffect(() => {
     // Scroll to the selected animation when component mounts
+    // Account for 1-indexed animation selection (selectedAnimation - 1 for the index)
     if (flatListRef.current && selectedAnimation !== null) {
-      flatListRef.current.scrollToIndex({
-        index: selectedAnimation,
-        animated: false,
-        viewPosition: 0.5
-      });
+      // Need to adjust for 1-indexing back to 0-indexing for the flatlist
+      const listIndex = selectedAnimation - 1;
+      if (listIndex >= 0) {
+        flatListRef.current.scrollToIndex({
+          index: listIndex,
+          animated: false,
+          viewPosition: 0.5
+        });
+      }
     }
   }, []);
 
   const handleItemPress = useCallback((index) => {
     // Configure smooth layout animation
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    dispatch(setSelectedAnimation(index));
+    // Use index + 1 to ensure animations start from 1 not 0
+    dispatch(setSelectedAnimation(index + 1));
     
     // Scroll to the selected item
     flatListRef.current?.scrollToIndex({
@@ -40,7 +46,8 @@ const AnimationList = () => {
   }, [dispatch]);
 
   const renderItem = useCallback(({ item, index }) => {
-    const isSelected = selectedAnimation === index;
+    // Check if the current animation is selected (index + 1 because we're 1-indexing animations)
+    const isSelected = selectedAnimation === index + 1;
     
     return (
       <TouchableOpacity
@@ -81,7 +88,7 @@ const AnimationList = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         style={styles.list}
-        initialScrollIndex={selectedAnimation}
+        initialScrollIndex={selectedAnimation !== null ? selectedAnimation - 1 : 0}
         getItemLayout={getItemLayout}
         // Performance optimizations
         removeClippedSubviews={true}
