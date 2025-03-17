@@ -1,37 +1,39 @@
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, Dimensions} from 'react-native';
 import React, {useState} from 'react';
 
 const ModuleSelection = ({onModuleSelect}) => {
+  const {width} = Dimensions.get('window');
+  
   return (
-    <View style={{width: '70%', alignItems: 'center', marginTop: 50}}>
+    <View style={{width: '70%', alignItems: 'center', marginTop: width * 0.05}}>
       <Text
         style={{
           color: '#AEAEAE',
-          fontSize: 16,
+          fontSize: width * 0.039,
           fontFamily: 'AlbertSans-Regular',
         }}>
         Uygulamayı kullanmak için lütfen cihazın özelliklerini tanımlayın.
       </Text>
       <View
         style={{
-          marginTop: 20,
+          marginTop: width * 0.05,
           backgroundColor: '#000000',
-          padding: 10,
+          padding: width * 0.025,
           borderRadius: 10,
         }}>
-        <View style={{flexDirection: 'row', gap: 10, width: 260}}>
+        <View style={{flexDirection: 'row', gap: width * 0.025, width: width * 0.65}}>
           <TouchableOpacity
             onPress={() => onModuleSelect('rgb')}
             style={{
               backgroundColor: '#caef46',
-              padding: 10,
+              padding: width * 0.025,
               borderRadius: 10,
-              width: 125,
+              width: width * 0.31,
             }}>
             <Text
               style={{
                 color: '#000000',
-                fontSize: 12,
+                fontSize: width * 0.03,
                 fontFamily: 'AlbertSans-Bold',
                 textAlign: 'center',
               }}>
@@ -42,14 +44,14 @@ const ModuleSelection = ({onModuleSelect}) => {
             onPress={() => onModuleSelect('yildiz')}
             style={{
               backgroundColor: '#caef46',
-              padding: 10,
+              padding: width * 0.025,
               borderRadius: 10,
-              width: 125,
+              width: width * 0.31,
             }}>
             <Text
               style={{
                 color: '#000000',
-                fontSize: 12,
+                fontSize: width * 0.03,
                 fontFamily: 'AlbertSans-Bold',
                 textAlign: 'center',
               }}>
@@ -57,19 +59,19 @@ const ModuleSelection = ({onModuleSelect}) => {
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={{marginTop: 10}}>
+        <View style={{marginTop: width * 0.025}}>
           <TouchableOpacity
             onPress={() => onModuleSelect('double')}
             style={{
               backgroundColor: '#caef46',
-              padding: 10,
+              padding: width * 0.025,
               borderRadius: 10,
-              width: 260,
+              width: width * 0.65,
             }}>
             <Text
               style={{
                 color: '#000000',
-                fontSize: 12,
+                fontSize: width * 0.03,
                 fontFamily: 'AlbertSans-Bold',
                 textAlign: 'center',
               }}>
