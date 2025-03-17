@@ -48,7 +48,7 @@ const Speed = ({ moduleCount }) => {
         stepSize={1}
       />
       <Slider
-        label="Bekleme Süresi"
+        label="Parlaklık"
         value={waitingTime || 10}
         onValueChange={handleWaitingTimeChange}
         onSlidingComplete={handleWaitingTimeComplete}
