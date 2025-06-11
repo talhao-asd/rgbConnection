@@ -6,6 +6,8 @@ import LoadingComponent from '../components/LoadingComponent';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import HomeScreen from '../screens/HomeScreen';
+import RGBConnection from '../screens/RGBConnection';
+import DeviceControlScreen from '../screens/DeviceControlScreen';
 
 const Stack = createStackNavigator();
 
@@ -42,6 +44,16 @@ const Navigation = () => {
         <Stack.Screen 
           name="Home" 
           component={HomeScreen} 
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen 
+          name="RGBConnection" 
+          component={RGBConnection} 
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen 
+          name="DeviceControl" 
+          component={DeviceControlScreen} 
           options={{ gestureEnabled: false }}
         />
       </Stack.Navigator>
