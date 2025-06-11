@@ -3,8 +3,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import Footer from '../components/SettingsFooter'
 import BLEService from '../services/BLEService'
+import { useDispatch } from 'react-redux'
+import { setDeviceInfo, setConnectionStatus, setBleDevice } from '../redux/slices/deviceSlice'
 
 const WelcomeScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [showDevices, setShowDevices] = useState(false);
   const [devices, setDevices] = useState([]);
   const [scanning, setScanning] = useState(false);
@@ -66,9 +69,39 @@ const WelcomeScreen = ({ navigation }) => {
   };
   
   const handleDeviceSelect = async (device) => {
-    setShowDevices(false);
-    // Navigate to SettingsScreen with the selected device
-    navigation.navigate('Settings', { selectedDevice: device });
+    try {
+      const success = await bleServiceRef.current.connectToDevice(device.id);
+      if (success) {
+        // Store device information in Redux
+        dispatch(setDeviceInfo({
+          id: device.id,
+          name: device.name || 'Unknown Device'
+        }));
+        dispatch(setConnectionStatus(true));
+        
+        // Store the actual BLE device object
+        const bleDevice = bleServiceRef.current.connectedDevices.get(device.id);
+        if (bleDevice) {
+          dispatch(setBleDevice(bleDevice));
+        }
+        
+        // Hide device selection modal
+        setShowDevices(false);
+        
+        // Navigate directly to Settings screen for module selection
+        navigation.navigate('Settings', {
+          selectedDevice: {
+            id: device.id,
+            name: device.name || 'Unknown Device'
+          }
+        });
+      } else {
+        Alert.alert('Connection Error', 'Failed to connect to device.');
+      }
+    } catch (error) {
+      console.error('Error connecting to device:', error);
+      Alert.alert('Connection Error', 'An error occurred while connecting to the device.');
+    }
   };
   
   const renderDeviceItem = ({ item }) => (
