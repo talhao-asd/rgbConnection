@@ -2,12 +2,14 @@ import { View, TouchableOpacity } from 'react-native'
 import React, { memo, useState, useCallback, useEffect, useRef } from 'react'
 import Icon from 'react-native-vector-icons/Feather'
 import base64 from 'react-native-base64'
+import { useSelector } from 'react-redux'
 
 const SERVICE_UUID = '00000180-0000-1000-8000-00805f9b34fb';
 const CHARACTERISTIC_UUID = '0000dead-0000-1000-8000-00805f9b34fb';
 
 // This can be the most recently connected device ID from your app
-const LAST_KNOWN_DEVICE_ID = 'EC:DA:3B:B6:B6:AE'; // Replace with your device ID
+// Removing hardcoded device ID to allow users to connect to any device
+// const LAST_KNOWN_DEVICE_ID = '48:31:B7:01:EC:F2'; // Replace with your device ID
 
 // Default values
 const DEFAULT_MODE = "Y"; // Y = Yıldız mode
@@ -24,7 +26,6 @@ const DEFAULT_BLUE_VALUE = "255"; // Blue component for RGBW static color
 const DEFAULT_WHITE_VALUE = "0"; // White component for RGBW static color
 
 const Footer = memo(({ 
-  bleManager, 
   connectedDevice: externalDevice, 
   mode = DEFAULT_MODE,
   ledCount = DEFAULT_LED_COUNT,
@@ -44,6 +45,9 @@ const Footer = memo(({
   const [isPowerOn, setIsPowerOn] = useState(false);
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  
+  // Get the device from Redux if not provided through props
+  const { bleDevice } = useSelector(state => state.device);
   
   // Store current values in a ref to avoid stale closures
   const valuesRef = useRef({
@@ -92,26 +96,24 @@ const Footer = memo(({
     whiteValue
   ]);
 
-  // Try to use the provided device or connect to a known one
+  // Update connected device when external device changes or Redux store updates
   useEffect(() => {
-    if (externalDevice) {
-      setConnectedDevice(externalDevice);
-      return;
+    // Priority: 1. External device from parent 2. Redux store device
+    const deviceToUse = externalDevice || bleDevice;
+    
+    if (deviceToUse && deviceToUse !== connectedDevice) {
+      console.log('Footer using device:', deviceToUse.id || 'Unknown ID');
+      setConnectedDevice(deviceToUse);
     }
+  }, [externalDevice, bleDevice, connectedDevice]);
 
-    // Only try to connect if no device is connected and we have a bleManager
-    if (!connectedDevice && !isConnecting && bleManager) {
-      connectToDevice();
-    }
-  }, [externalDevice, bleManager]);
-
-  const connectToDevice = async () => {
-    if (isConnecting) return;
+  const connectToDevice = async (deviceId) => {
+    if (isConnecting || !deviceId) return;
     
     setIsConnecting(true);
     try {
-      console.log('Attempting to connect to device:', LAST_KNOWN_DEVICE_ID);
-      const device = await bleManager.connectToDevice(LAST_KNOWN_DEVICE_ID);
+      console.log('Attempting to connect to device:', deviceId);
+      const device = await bleManager.connectToDevice(deviceId);
       console.log('Connected to device directly from Footer:', device.id);
       
       await device.discoverAllServicesAndCharacteristics();
@@ -175,60 +177,33 @@ const Footer = memo(({
     return command;
   };
 
-  const sendBLECommand = useCallback(async (isOn) => {
-    try {
-      if (!bleManager) {
-        console.log('BLE Manager is not provided');
-        return;
-      }
-      
-      const device = connectedDevice || externalDevice;
-      if (!device) {
-        console.log('No device connected', {
-          bleManager: !!bleManager,
-          hasConnectedDevice: !!connectedDevice,
-          hasExternalDevice: !!externalDevice
-        });
-        return;
-      }
-
-      // Format command string - explicitly pass the isOn parameter to use correct case
-      const command = formatCommand(isOn);
-      console.log(`About to send BLE command: ${command} to set device power: ${isOn ? 'ON' : 'OFF'}`);
-      
-      // Convert string to base64
-      const base64Data = base64.encode(command);
-
-      await bleManager.writeCharacteristicWithoutResponseForDevice(
-        device.id,
-        SERVICE_UUID,
-        CHARACTERISTIC_UUID,
-        base64Data
-      );
-      
-      console.log('Command sent successfully');
-    } catch (error) {
-      console.error('Error sending BLE command:', error);
-    }
-  }, [bleManager, connectedDevice, externalDevice]);
-
-  const handlePowerPress = useCallback(() => {
+  const togglePower = useCallback(async () => {
     const newPowerState = !isPowerOn;
-    console.log(`Power button pressed. Changing power state from ${isPowerOn ? 'ON' : 'OFF'} to ${newPowerState ? 'ON' : 'OFF'}`);
     setIsPowerOn(newPowerState);
     
-    // Only send the command if sendImmediately is true
-    if (sendImmediately) {
-      console.log(`Sending command immediately with target power state: ${newPowerState ? 'ON' : 'OFF'}`);
-      sendBLECommand(newPowerState);
+    // If we have a callback, notify the parent component about the state change
+    if (onStateChange) {
+      onStateChange(newPowerState, connectedDevice);
     }
     
-    // Always notify parent component about power state change
-    if (onStateChange) {
-      console.log(`Notifying parent component about power state change: ${newPowerState ? 'ON' : 'OFF'}`);
-      onStateChange(newPowerState, connectedDevice || externalDevice);
+    // If we should send the command immediately, do so
+    if (sendImmediately && connectedDevice) {
+      try {
+        const command = formatCommand(newPowerState);
+        console.log('Sending command:', command);
+        
+        const base64Command = base64.encode(command);
+        await connectedDevice.writeCharacteristicWithResponseForService(
+          SERVICE_UUID,
+          CHARACTERISTIC_UUID,
+          base64Command
+        );
+        console.log('Power command sent successfully');
+      } catch (error) {
+        console.error('Error sending power command:', error);
+      }
     }
-  }, [isPowerOn, sendBLECommand, onStateChange, connectedDevice, externalDevice, sendImmediately]);
+  }, [isPowerOn, connectedDevice, onStateChange, sendImmediately, formatCommand]);
 
   return (
     <View style={{
@@ -241,7 +216,7 @@ const Footer = memo(({
       marginBottom: 20
     }}>
       <TouchableOpacity 
-        onPress={handlePowerPress}
+        onPress={togglePower}
         style={{
           padding: 10,
           borderRadius: 30,
