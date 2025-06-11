@@ -84,17 +84,21 @@ class BLEService {
               return;
             }
 
-            // Only add devices with a name
-            if (device.name) {
-              const deviceInfo = {
-                id: device.id,
-                name: device.name,
-                rssi: device.rssi,
-              };
-              
-              // Avoid duplicates
-              if (!devices.find(d => d.id === device.id)) {
-                devices.push(deviceInfo);
+            // Include all devices, not just ones with names
+            const deviceInfo = {
+              id: device.id,
+              name: device.name || 'Unknown Device',
+              rssi: device.rssi,
+            };
+            
+            // Avoid duplicates
+            if (!devices.find(d => d.id === device.id)) {
+              devices.push(deviceInfo);
+            } else {
+              // Update RSSI for existing device
+              const existingDeviceIndex = devices.findIndex(d => d.id === device.id);
+              if (existingDeviceIndex !== -1) {
+                devices[existingDeviceIndex].rssi = device.rssi;
               }
             }
           }
@@ -108,6 +112,14 @@ class BLEService {
 
   async connectToDevice(deviceId) {
     try {
+      console.log('Connecting to device:', deviceId);
+      
+      // Check if already connected to this device
+      if (this.connectedDevices.has(deviceId)) {
+        console.log('Device already connected:', deviceId);
+        return true;
+      }
+      
       const device = await this.bleManager.connectToDevice(deviceId);
       console.log('Connected to device:', deviceId);
 
@@ -132,6 +144,27 @@ class BLEService {
       this.deviceCharacteristics.set(deviceId, deviceChars);
       console.log('Device characteristics:', deviceChars);
       
+      // Set up disconnect listener (only once per device)
+      // Use the actual device ID as a key to prevent duplicate listeners
+      if (!this.disconnectListeners?.has(deviceId)) {
+        const disconnectSubscription = device.onDisconnected((error, disconnectedDevice) => {
+          console.log('Device disconnected:', disconnectedDevice.id);
+          this.connectedDevices.delete(disconnectedDevice.id);
+          this.deviceCharacteristics.delete(disconnectedDevice.id);
+          
+          // Remove this listener from our map
+          if (this.disconnectListeners?.has(deviceId)) {
+            this.disconnectListeners.delete(deviceId);
+          }
+        });
+        
+        // Store the subscription so we can remove it later if needed
+        if (!this.disconnectListeners) {
+          this.disconnectListeners = new Map();
+        }
+        this.disconnectListeners.set(deviceId, disconnectSubscription);
+      }
+      
       return true;
     } catch (error) {
       console.error('Connection error:', error);
@@ -140,8 +173,18 @@ class BLEService {
   }
 
   async writeDataToDevice(deviceId, data) {
+    console.log(`Trying to write data to device: ${deviceId}`);
+    
+    // Check if deviceId is provided
+    if (!deviceId) {
+      console.error('No device ID provided for writeDataToDevice');
+      return false;
+    }
+    
     const device = this.connectedDevices.get(deviceId);
     if (!device) {
+      console.error(`Device ${deviceId} not connected or not found in connected devices list`);
+      console.log('Currently connected devices:', Array.from(this.connectedDevices.keys()));
       throw new Error(`Device ${deviceId} not connected`);
     }
 
@@ -224,14 +267,30 @@ class BLEService {
     const device = this.connectedDevices.get(deviceId);
     if (device) {
       try {
+        console.log(`Explicitly disconnecting from device: ${deviceId}`);
+        
+        // Remove the disconnect listener to prevent any issues
+        if (this.disconnectListeners?.has(deviceId)) {
+          this.disconnectListeners.get(deviceId).remove();
+          this.disconnectListeners.delete(deviceId);
+        }
+        
+        // Cancel the connection
         await device.cancelConnection();
+        
+        // Clean up our internal state
         this.connectedDevices.delete(deviceId);
+        this.deviceCharacteristics.delete(deviceId);
+        
+        console.log(`Successfully disconnected from device: ${deviceId}`);
         return true;
       } catch (error) {
         console.error('Disconnect error:', error);
         return false;
       }
     }
+    
+    return false;
   }
 
   // Clean up method
