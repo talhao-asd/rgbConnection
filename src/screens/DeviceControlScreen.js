@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import BLEService from '../services/BLEService';
 
 const DeviceControlScreen = ({ route, navigation }) => {
@@ -17,10 +17,19 @@ const DeviceControlScreen = ({ route, navigation }) => {
     // Initialize BLEService
     bleServiceRef.current = new BLEService();
     
+    // Set title with device name
+    navigation.setOptions({
+      title: deviceName || 'Device Control'
+    });
+    
     // Check if device is still connected and has the right characteristic
     const checkConnection = async () => {
       if (bleServiceRef.current && !bleServiceRef.current.isDeviceConnected(deviceId)) {
-        navigation.goBack();
+        Alert.alert(
+          'Device Disconnected',
+          'The device has been disconnected.',
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
       }
       
       if (bleServiceRef.current) {
@@ -31,11 +40,15 @@ const DeviceControlScreen = ({ route, navigation }) => {
     
     checkConnection();
     
+    // Set up an interval to check connection status
+    const connectionCheckInterval = setInterval(checkConnection, 5000);
+    
     // Clean up when component unmounts
     return () => {
+      clearInterval(connectionCheckInterval);
       // Any cleanup needed
     };
-  }, [deviceId]);
+  }, [deviceId, deviceName, navigation]);
 
   const sendCommand = async (command) => {
     try {
@@ -94,10 +107,23 @@ const DeviceControlScreen = ({ route, navigation }) => {
     await sendCommand(command);
   };
 
+  const disconnect = async () => {
+    try {
+      if (bleServiceRef.current) {
+        await bleServiceRef.current.disconnectDevice(deviceId);
+        console.log('Device disconnected');
+        navigation.goBack();
+      }
+    } catch (error) {
+      console.error('Disconnect error:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Device Control</Text>
-      <Text style={styles.deviceName}>{deviceName || deviceId}</Text>
+      <Text style={styles.deviceName}>{deviceName || 'Unknown Device'}</Text>
+      <Text style={styles.deviceId}>{deviceId}</Text>
       
       {/* Power Button */}
       <TouchableOpacity 
@@ -134,12 +160,20 @@ const DeviceControlScreen = ({ route, navigation }) => {
         </View>
       </View>
       
+      {/* Disconnect Button */}
+      <TouchableOpacity 
+        style={styles.disconnectButton}
+        onPress={disconnect}
+      >
+        <Text style={styles.disconnectButtonText}>Disconnect</Text>
+      </TouchableOpacity>
+      
       {/* Back Button */}
       <TouchableOpacity 
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backButtonText}>Back</Text>
+        <Text style={styles.backButtonText}>Back to Device List</Text>
       </TouchableOpacity>
     </View>
   );
@@ -162,6 +196,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#AAAAAA',
     marginBottom: 30,
+  },
+  deviceId: {
+    fontSize: 12,
+    color: '#888888',
+    marginBottom: 20,
+    fontFamily: 'monospace',
   },
   button: {
     backgroundColor: '#333333',
@@ -204,6 +244,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#CAEF46',
   },
   modeText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  disconnectButton: {
+    backgroundColor: '#3B82F6',
+    padding: 15,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  disconnectButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
