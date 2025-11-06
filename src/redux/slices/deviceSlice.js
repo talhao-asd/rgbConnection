@@ -6,6 +6,7 @@ const initialState = {
   isConnected: false,
   isConnecting: false,
   connectionError: null,
+  bleDevice: null,
 };
 
 const deviceSlice = createSlice({
@@ -26,6 +27,9 @@ const deviceSlice = createSlice({
     setConnectionError: (state, action) => {
       state.connectionError = action.payload;
     },
+    setBleDevice: (state, action) => {
+      state.bleDevice = action.payload;
+    },
     resetDeviceState: (state) => {
       return initialState;
     },
@@ -37,6 +41,7 @@ export const {
   setConnectionStatus, 
   setConnectingStatus, 
   setConnectionError,
+  setBleDevice,
   resetDeviceState
 } = deviceSlice.actions;
 

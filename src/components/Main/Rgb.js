@@ -1,23 +1,84 @@
 import {View, SafeAreaView} from 'react-native';
-import React, {memo, useMemo, useState, useCallback, useEffect} from 'react';
+import React, {memo, useMemo, useState, useCallback, useEffect, useRef} from 'react';
 import ColorWheel from '../Rgb/ColorWheel';
 import Speed from '../Rgb/Speed';
 import Footer from '../Footer';
-import {useSelector} from 'react-redux';
-import {BleManager} from 'react-native-ble-plx';
+import {useSelector, useDispatch} from 'react-redux';
 import base64 from 'react-native-base64';
+import BLEService from '../../services/BLEService';
 
 const SERVICE_UUID = '00000180-0000-1000-8000-00805f9b34fb';
 const CHARACTERISTIC_UUID = '0000dead-0000-1000-8000-00805f9b34fb';
 
 const Rgb = memo(() => {
-  // Create a BLE manager instance
-  const [bleManager] = useState(() => new BleManager());
   const [isPowerOn, setIsPowerOn] = useState(false);
   const [connectedDevice, setConnectedDevice] = useState(null);
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  
+  // Access BLEService for potential reconnection
+  const bleServiceRef = useRef(null);
 
   // Use more specific selectors to prevent unnecessary re-renders
   const rgbState = useSelector(state => state.rgb);
+  const {bleDevice, deviceId, isConnected} = useSelector(state => state.device);
+  const dispatch = useDispatch();
+
+  // Initialize BLEService if needed
+  useEffect(() => {
+    bleServiceRef.current = new BLEService();
+  }, []);
+
+  // Set the connected device from Redux
+  useEffect(() => {
+    if (bleDevice) {
+      console.log('RGB component received device from Redux:', deviceId);
+      setConnectedDevice(bleDevice);
+    }
+  }, [bleDevice, deviceId]);
+
+  // Handle reconnection attempts if device disconnects
+  const attemptReconnect = useCallback(async () => {
+    if (!deviceId || isReconnecting) return;
+    
+    try {
+      setIsReconnecting(true);
+      console.log('RGB component attempting to reconnect to device:', deviceId);
+      
+      if (bleServiceRef.current) {
+        const success = await bleServiceRef.current.connectToDevice(deviceId);
+        if (success) {
+          // Update the connected device
+          const reconnectedDevice = bleServiceRef.current.connectedDevices.get(deviceId);
+          if (reconnectedDevice) {
+            setConnectedDevice(reconnectedDevice);
+            console.log('RGB successfully reconnected to device:', deviceId);
+          }
+        } else {
+          console.log('RGB failed to reconnect to device');
+        }
+      }
+    } catch (error) {
+      console.error('Error during reconnection attempt:', error);
+    } finally {
+      setIsReconnecting(false);
+    }
+  }, [deviceId, isReconnecting]);
+
+  // If device is null but we have a deviceId, try to reconnect
+  useEffect(() => {
+    if (deviceId && !connectedDevice && !isReconnecting) {
+      console.log('Device connection lost, attempting to reconnect from RGB component');
+      attemptReconnect();
+    }
+  }, [connectedDevice, deviceId, attemptReconnect, isReconnecting]);
+
+  // Don't disconnect when component unmounts
+  useEffect(() => {
+    return () => {
+      // No need to disconnect, as this would break other tabs
+      console.log('RGB component unmounting, preserving device connection');
+    };
+  }, []);
 
   // Format command for RGB static color mode
   const formatCommand = useCallback(
@@ -129,60 +190,27 @@ const Rgb = memo(() => {
 
   // Effect to scan for devices when component mounts
   useEffect(() => {
-    const scanAndConnect = async () => {
-      try {
-        // Start scanning for devices
-        bleManager.startDeviceScan(null, null, async (error, device) => {
-          if (error) {
-            console.error('Scan error:', error);
-            return;
-          }
-
-          // Check if this is the device we're looking for
-          if (
-            device.name === 'RGB_DEVICE' ||
-            device.name?.includes('RGB') ||
-            device.id === 'EC:DA:3B:B6:B6:AE'
-          ) {
-            bleManager.stopDeviceScan();
-            try {
-              const connectedDevice = await bleManager.connectToDevice(
-                device.id,
-              );
-              await connectedDevice.discoverAllServicesAndCharacteristics();
-              setConnectedDevice(connectedDevice);
-              console.log('Connected to RGB device:', device.id);
-            } catch (connectError) {
-              console.error('RGB connection error:', connectError);
-            }
-          }
-        });
-
-        // Stop scan after 10 seconds to save battery
-        setTimeout(() => {
-          bleManager.stopDeviceScan();
-        }, 10000);
-      } catch (error) {
-        console.error('Error in RGB scan:', error);
-      }
-    };
-
-    scanAndConnect();
-
+    // Remove the automatic scanning and connection
+    // This functionality should only happen in the dedicated RGBConnection screen
+    
     // Cleanup function
-    return () => {
-      bleManager.stopDeviceScan();
-      if (connectedDevice) {
-        connectedDevice.cancelConnection();
-      }
-    };
-  }, [bleManager]);
+    // return () => {
+    //   if (connectedDevice) {
+    //     connectedDevice.cancelConnection();
+    //   }
+    // };
+  }, [connectedDevice]);
 
-  // Effect to send command when rgb state changes (color or speed)
+  // Effect to send command when rgb state changes
   useEffect(() => {
     if (isPowerOn && connectedDevice) {
-      // Send command when any of the relevant parameters change
-      sendCommand();
+      try {
+        // Send command when any of the relevant parameters change
+        console.log(`Sending command from RGB using device: ${connectedDevice.id}`);
+        sendCommand();
+      } catch (error) {
+        console.error('Error in RGB command effect:', error);
+      }
     }
   }, [isPowerOn, connectedDevice, rgbState.color, rgbState.speed, sendCommand]);
 
@@ -195,7 +223,7 @@ const Rgb = memo(() => {
     return (
       <>
         <Footer
-          bleManager={bleManager}
+          bleManager={bleDevice}
           connectedDevice={connectedDevice}
           mode="S"
           onStateChange={handlePowerToggle}
@@ -209,7 +237,7 @@ const Rgb = memo(() => {
 
       </>
     );
-  }, [bleManager, connectedDevice, handlePowerToggle, rgbState]);
+  }, [bleDevice, connectedDevice, handlePowerToggle, rgbState]);
 
   return (
     <SafeAreaView style={{flex: 1, gap: 10}}>

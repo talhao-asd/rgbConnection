@@ -36,6 +36,7 @@ const Header = memo(({navigation}) => {
   const {deviceId, deviceName} = useSelector(state => state.device);
 
   const handleModuleSelect = useCallback((moduleName) => {
+    console.log(`Switching tab to: ${moduleName}. Preserving device connection.`);
     dispatch(setActiveComponent(moduleName));
   }, [dispatch]);
 
@@ -49,6 +50,11 @@ const Header = memo(({navigation}) => {
       preSelectedModule: moduleType
     });
   }, [navigation, deviceId, deviceName, moduleType]);
+
+  const handleConnectPress = useCallback(() => {
+    // Navigate to RGB Connection screen
+    navigation.navigate('RGBConnection');
+  }, [navigation]);
 
   // Render header options based on module type
   const renderHeaderOptions = useCallback(() => {

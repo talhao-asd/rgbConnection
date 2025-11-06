@@ -1,5 +1,5 @@
 import {SafeAreaView, View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import React, {useEffect, memo, useCallback, useMemo} from 'react';
+import React, {useEffect, memo, useCallback, useMemo, useRef} from 'react';
 import Header from '../components/Header';
 import KayanYildiz from '../components/Main/KayanYildiz';
 import Yildiz from '../components/Main/Yildiz';
@@ -37,7 +37,18 @@ const HomeScreen = ({route, navigation}) => {
   
   // Get state from Redux store
   const {moduleType, moduleCount, activeComponent} = useSelector(state => state.module);
-  const {deviceId, deviceName} = useSelector(state => state.device);
+  const {deviceId, deviceName, bleDevice} = useSelector(state => state.device);
+
+  // Keep track of previous active component to prevent unnecessary re-renders
+  const prevActiveComponentRef = useRef(null);
+
+  useEffect(() => {
+    // Log component changes to help with debugging
+    if (prevActiveComponentRef.current !== activeComponent) {
+      console.log(`Active component changed from ${prevActiveComponentRef.current} to ${activeComponent}`);
+      prevActiveComponentRef.current = activeComponent;
+    }
+  }, [activeComponent]);
 
   useEffect(() => {
     // Get the module type, count, and device info from navigation params
